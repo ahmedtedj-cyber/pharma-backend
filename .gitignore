@@ -1,3 +1,10 @@
+ai_models/
+*.pt
+*.pth
+*.onnx
+*.bin
+*.ckpt
+*.safetensors
 __pycache__/
 *.py[cod]
 *.sqlite3
