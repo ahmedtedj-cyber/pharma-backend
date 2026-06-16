@@ -1,0 +1,8 @@
+from routes.cameras import router as cameras_router
+from routes.products import router as products_router
+from routes.lots import router as lots_router
+from routes.inspections import router as inspections_router
+from routes.alerts import router as alerts_router
+from routes.analytics import router as analytics_router
+from routes.reports import router as reports_router
+from routes.settings import router as settings_router
