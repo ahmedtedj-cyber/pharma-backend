@@ -1,2 +1,5 @@
 [phases.setup]
 aptPkgs = ["libgl1", "libglib2.0-0"]
+
+[variables]
+LD_LIBRARY_PATH = "/usr/lib/x86_64-linux-gnu:/usr/lib"
