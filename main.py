@@ -98,7 +98,7 @@ app.include_router(alerts_router)
 app.include_router(analytics_router)
 app.include_router(reports_router)
 app.include_router(settings_router)
-
+app.include_router(stats_router)
 
 # ── Routes de base ─────────────────────────────────────────────────────────
 
