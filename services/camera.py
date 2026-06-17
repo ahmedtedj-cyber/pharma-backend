@@ -7,6 +7,7 @@ fournit le flux de frames pour le pipeline IA.
 import cv2
 import base64
 import logging
+import numpy as np
 from typing import Optional
 from config import settings
 
@@ -77,6 +78,7 @@ class CameraStream:
         self.is_open = False
         self.frames_read = 0
         self.errors = 0
+        self.is_mock = False
 
     def open(self) -> bool:
         # Essayer DirectShow d'abord (plus stable sur Windows), puis défaut
@@ -95,15 +97,38 @@ class CameraStream:
                     logger.info(f"Caméra {self.camera_index} ouverte (backend={'DSHOW' if backend == cv2.CAP_DSHOW else 'ANY'})")
                     return True
                 cap.release()
+
+        # Aucune caméra physique disponible (cas attendu sur un serveur cloud
+        # comme Railway). Si autorisé par la configuration, on bascule en
+        # mode MOCK : on simule un flux de frames pour permettre la démo du
+        # pipeline IA sans caméra physique connectée.
+        if getattr(settings, "ALLOW_MOCK_CAMERA", True):
+            self.is_open = True
+            self.is_mock = True
+            logger.warning(
+                f"Caméra {self.camera_index} inaccessible — mode MOCK activé "
+                "(aucune caméra physique détectée, probablement un environnement cloud)"
+            )
+            return True
+
         logger.error(f"Caméra {self.camera_index} inaccessible")
         return False
 
     def read_frame(self):
         """Retourne le frame numpy ou None en cas d'erreur.
         Rouvre la caméra si elle est bloquée (bug MSMF Windows).
+        En mode MOCK (pas de caméra physique), génère une frame factice
+        pour permettre de tester le pipeline IA de bout en bout.
         """
         if not self.is_open:
             return None
+
+        if self.is_mock:
+            # Frame factice (bruit gris) — suffisant pour exercer le pipeline
+            # YOLOv8 → PatchCore sans caméra physique connectée.
+            frame = np.random.randint(60, 196, (480, 640, 3), dtype=np.uint8)
+            self.frames_read += 1
+            return frame
 
         # Essai 1 : lecture normale
         if self._cap and self._cap.isOpened():
@@ -137,12 +162,14 @@ class CameraStream:
         if self._cap:
             self._cap.release()
         self.is_open = False
-        logger.info(f"Caméra {self.camera_index} fermée après {self.frames_read} frames")
+        mode = " (mock)" if self.is_mock else ""
+        logger.info(f"Caméra {self.camera_index} fermée{mode} après {self.frames_read} frames")
 
     def get_stats(self) -> dict:
         return {
             "camera_index": self.camera_index,
             "is_open": self.is_open,
+            "is_mock": self.is_mock,
             "frames_read": self.frames_read,
             "errors": self.errors
         }
