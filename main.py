@@ -17,7 +17,7 @@ from models.database import init_db, get_db, AsyncSessionLocal
 from routes import (
     cameras_router, products_router, lots_router,
     inspections_router, alerts_router, analytics_router,
-    reports_router, settings_router
+    reports_router, settings_router, stats_router
 )
 from services.inspection import traiter_frame_inspection, get_active_sessions, cleanup_stale_sessions
 from websocket_manager import manager
@@ -98,7 +98,7 @@ app.include_router(alerts_router)
 app.include_router(analytics_router)
 app.include_router(reports_router)
 app.include_router(settings_router)
-app.include_router(stats_router)
+
 
 # ── Routes de base ─────────────────────────────────────────────────────────
 
