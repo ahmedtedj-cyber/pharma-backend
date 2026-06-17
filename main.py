@@ -5,6 +5,7 @@ Pipeline : YOLOv8 → PatchCore | WebSocket temps réel | REST API complète
 
 import asyncio
 import logging
+import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -75,6 +76,7 @@ ALLOWED_ORIGINS = [
     "http://127.0.0.1:4200",
     "http://localhost:8080",
     "http://127.0.0.1:8080",
+    "https://pharmagurad.netlify.app",
 ]
 
 app.add_middleware(
@@ -184,10 +186,11 @@ async def server_error(request, exc):
 
 if __name__ == "__main__":
     import uvicorn
+    port = int(os.environ.get("PORT", 8000))
     uvicorn.run(
         "main:app",
         host="0.0.0.0",
-        port=8000,
+        port=port,
         reload=False,
         log_level="debug" if settings.DEBUG else "info"
     )
